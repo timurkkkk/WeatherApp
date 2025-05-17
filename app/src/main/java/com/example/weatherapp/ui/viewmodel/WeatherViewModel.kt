@@ -1,12 +1,15 @@
-package com.example.weatherapp
+package com.example.weatherapp.ui.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.weatherapp.data.model.CityWeather
+import com.example.weatherapp.data.repository.WeatherRepository
 import kotlinx.coroutines.launch
 
-class WeatherViewModel : ViewModel() {
+class WeatherViewModel (private val weatherRepository: WeatherRepository) : ViewModel() {
+
     private val _citiesWeather = mutableStateOf<List<CityWeather>>(emptyList())
     val citiesWeather: State<List<CityWeather>> = _citiesWeather
 
@@ -16,8 +19,6 @@ class WeatherViewModel : ViewModel() {
     private val _error = mutableStateOf<String?>(null)
     val error: State<String?> = _error
 
-    private val apiClient = WeatherApiClient.create()
-
     fun loadWeatherForCities(cityNames: List<String>) {
         if (_citiesWeather.value.isNotEmpty()) return
 
@@ -25,7 +26,7 @@ class WeatherViewModel : ViewModel() {
             _isLoading.value = true
             _error.value = null
             try {
-                val result = apiClient.getWeatherForCities(cityNames)
+                val result = weatherRepository.getWeatherForCities(cityNames)
                 _citiesWeather.value = result
             } catch (e: Exception) {
                 _error.value = "Error: ${e.message}"
